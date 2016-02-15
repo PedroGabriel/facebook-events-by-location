@@ -110,7 +110,7 @@ if(isset($_GET) && count($_GET)){
     $venuesWithEvents = 0;
     $eventsCount = 0;
 
-    $url = 'https://graph.facebook.com/v2.5/search?type=place&q=%2A&center='.$_GET['lat'].'%2C'.$_GET['lng'].'&distance='.($_GET['distance']*1000).'&limit=1000&fields=id&access_token='.$_GET['access_token'];
+    $url = 'https://graph.facebook.com/v2.5/search?type=place&q=%2A&center='.$_GET['lat'].'%2C'.$_GET['lng'].'&distance='.($_GET['distance']).'&limit=1000&fields=id&access_token='.$_GET['access_token'];
 
     $responseBody = _fetch($url);
     // print_r($responseBody);
