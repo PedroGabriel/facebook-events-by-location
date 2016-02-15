@@ -9,6 +9,38 @@ function _fetch($url){
     return json_decode($response);
 }
 
+function multiRequest($data, $options = array()) {
+
+  $curly = array();
+  $result = array();
+  $mh = curl_multi_init();
+
+  foreach ($data as $id => $d) {
+    $curly[$id] = curl_init($d);
+
+    curl_setopt($curly[$id], CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curly[$id], CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curly[$id], CURLOPT_SSL_VERIFYHOST, 0);
+
+    curl_multi_add_handle($mh, $curly[$id]);
+  }
+
+  $running = null;
+  do {
+    curl_multi_exec($mh, $running);
+  } while($running > 0);
+
+
+  foreach($curly as $id => $c) {
+    $result[$id] = json_decode(curl_multi_getcontent($c));
+    curl_multi_remove_handle($mh, $c);
+  }
+
+  curl_multi_close($mh);
+
+  return $result;
+}
+
 function calculateStarttimeDifference($currentTime,$dataString) {
   return strtotime($dataString)-$currentTime;
 }
@@ -80,7 +112,6 @@ if(isset($_GET) && count($_GET)){
 
     $url = 'https://graph.facebook.com/v2.5/search?type=place&q=%2A&center='.$_GET['lat'].'%2C'.$_GET['lng'].'&distance='.($_GET['distance']*1000).'&limit=1000&fields=id&access_token='.$_GET['access_token'];
 
-    echo "<pre>";
     $responseBody = _fetch($url);
     // print_r($responseBody);
 
@@ -105,12 +136,16 @@ if(isset($_GET) && count($_GET)){
       array_push($ids,$tempArray);
     }
 
-    $results = array();
+    $urls = array();
 
     //Create a Graph API request array
     foreach($ids as $idArray) {
-      array_push($results,_fetch("https://graph.facebook.com/v2.5/?ids=" . implode(',',$idArray) . "&fields=id,name,cover.fields(id,source),picture.type(large),location,events.fields(id,name,cover.fields(id,source),picture.type(large),description,start_time,attending_count,declined_count,maybe_count,noreply_count).since(" . $currentTimestamp . ")&access_token=" . $_GET['access_token']));
+      array_push($urls,"https://graph.facebook.com/v2.5/?ids=" . implode(',',$idArray) . "&fields=id,name,cover.fields(id,source),picture.type(large),location,events.fields(id,name,cover.fields(id,source),picture.type(large),description,start_time,attending_count,declined_count,maybe_count,noreply_count).since(" . $currentTimestamp . ")&access_token=" . $_GET['access_token']);
     }
+
+
+    $results = multiRequest($urls);
+
     $events = array();
 
     foreach($results as $resStr) {
