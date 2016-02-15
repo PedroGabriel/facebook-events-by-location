@@ -1,7 +1,7 @@
-# Search Facebook events by location (as a REST)
+# Search Facebook events by location (as a REST-api)
 Based in tobilg - https://github.com/tobilg/facebook-events-by-location (Node.js)
 
-A PHP-based webservice to get public Facebook events by location. It can be used as a starting point for an location-based app for example.
+A PHP-based REST-api to get public Facebook events by location. It can be used as a starting point for an location-based app for example.
 
 As Facebook has discontinued the FQL query API for all apps created after 2014-04-30, it has gotten much more complicated to get public Facebook events by passing a location.
 
